@@ -1,3 +1,4 @@
+## Touched to force editor revalidation
 name: Lint
 
 on:

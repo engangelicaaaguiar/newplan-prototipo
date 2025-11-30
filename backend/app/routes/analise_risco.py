@@ -43,3 +43,20 @@ async def get_analise_risco(questionario_id: int, db: Session = Depends(get_db))
     if not analise:
         raise HTTPException(status_code=404, detail="Análise não encontrada")
     return analise
+
+
+
+@router.get("/{questionario_id}/calcular")
+async def consultar_status_analise(questionario_id: int, db: Session = Depends(get_db)):
+    """Consult status/result of the risk analysis for a questionnaire.
+
+    This complements the POST route which triggers calculation.
+    """
+    analise = (
+        db.query(AnaliseRisco)
+        .filter(AnaliseRisco.questionario_id == questionario_id)
+        .first()
+    )
+    if not analise:
+        raise HTTPException(status_code=404, detail="Análise ainda não disponível")
+    return analise

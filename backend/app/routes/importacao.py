@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from app.database import get_db
 from app.models import Empresa, Vida, Cargo
@@ -15,7 +16,12 @@ async def create_empresa(empresa: EmpresaCreate, db: Session = Depends(get_db)):
     """Create a new enterprise."""
     db_empresa = Empresa(**empresa.dict())
     db.add(db_empresa)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as e:
+        db.rollback()
+        # assume unique constraint on cnpj/razao_social
+        raise HTTPException(status_code=409, detail="Empresa já existe (cnpj duplicado)")
     db.refresh(db_empresa)
     return db_empresa
 
